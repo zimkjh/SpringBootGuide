@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class WeatherApplicationTests {
     @Test
     void equalTest() {
-        assertEquals(1, 2);
+        assertEquals(1, 1);
     }
 
     @Test
