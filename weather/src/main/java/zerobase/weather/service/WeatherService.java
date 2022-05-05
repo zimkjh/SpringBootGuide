@@ -5,6 +5,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import zerobase.weather.domain.Weather;
 import zerobase.weather.repository.WeatherRepository;
@@ -26,7 +27,10 @@ public class WeatherService {
         this.weatherRepository = weatherRepository;
     }
 
+    @Scheduled(cron = "0 0 1 * * *")
+//    @Scheduled(cron = "0 0/2 * * * *")
     public void saveWeather() {
+        System.out.println("saved weather");
         // open weather map 에서 날씨 데이터 가져오기
         String weatherData = getWeatherString("seoul");
         // 날씨 json 파싱하기
