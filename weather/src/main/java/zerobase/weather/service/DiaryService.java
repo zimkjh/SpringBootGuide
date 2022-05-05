@@ -57,6 +57,10 @@ public class DiaryService {
         diaryRepository.save(nowDiary);
     }
 
+    public void deleteDiary(LocalDate date) {
+        diaryRepository.deleteAllByDate(date);
+    }
+
     private String getWeatherString() {
         String apiUrl = "https://api.openweathermap.org/data/2.5/weather?q=seoul&appid=" + apiKey;
         // 이 위에 주의해서 쳐야함.. & 까먹거나 할 수 있음 프린트해서 확인해보기
