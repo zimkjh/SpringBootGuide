@@ -4,11 +4,14 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import zerobase.weather.WeatherApplication;
 import zerobase.weather.domain.Diary;
 import zerobase.weather.domain.DateWeather;
 import zerobase.weather.repository.DiaryRepository;
@@ -30,6 +33,8 @@ public class DiaryService {
     private String apiKey;
     private final DiaryRepository diaryRepository;
     private final DateWeatherRepository dateWeatherRepository;
+    private static final Logger logger = LoggerFactory.getLogger(WeatherApplication.class);
+
 
     public DiaryService(DiaryRepository diaryRepository, DateWeatherRepository dateWeatherRepository) {
         this.diaryRepository = diaryRepository;
@@ -44,6 +49,7 @@ public class DiaryService {
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void createDiary(LocalDate date, String text) {
+        logger.info("created diary of text : " + text);
         // 날씨 데이터 가져오기
         DateWeather nowDateWeather = getDateWeather(date);
 
@@ -71,12 +77,12 @@ public class DiaryService {
     private DateWeather getDateWeather(LocalDate date) {
         List<DateWeather> dateWeatherListFromDB = dateWeatherRepository.findAllByDate(date);
         if (dateWeatherListFromDB.size() > 0) {
-            System.out.println("get weather from db");
+            logger.info("get dateWeather from db");
             return dateWeatherListFromDB.get(0);
         } else {
             // 과거 날짜의 날씨 가져오는것은 유료라 현재 날씨 가져옴
             // 정책상으로 현재 날씨를 가져올 수도 있고, 날씨를 없이 일기를 저장할수도있음
-            System.out.println("get weather from api");
+            logger.info("get dateWeather from api");
             return getWeatherFromApi();
         }
     }
@@ -98,18 +104,17 @@ public class DiaryService {
 
     public void deleteDiary(LocalDate date) {
         diaryRepository.deleteAllByDate(date);
+        logger.error("deleted");
     }
 
     private String getWeatherString() {
         String apiUrl = "https://api.openweathermap.org/data/2.5/weather?q=seoul&appid=" + apiKey;
         // 이 위에 주의해서 쳐야함.. & 까먹거나 할 수 있음 프린트해서 확인해보기
-//        System.out.println(apiUrl);
         try {
             URL url = new URL(apiUrl);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
             int responseCode = con.getResponseCode();
-//            System.out.println(responseCode);
             BufferedReader br;
             if (responseCode == 200) {
                 br = new BufferedReader(new InputStreamReader(con.getInputStream()));
@@ -124,6 +129,7 @@ public class DiaryService {
             br.close();
             return response.toString();
         } catch (Exception e) {
+            logger.error("failed to get weather from OpenWeatherMapApi");
             return "failed to get response";
         }
     }
@@ -134,6 +140,7 @@ public class DiaryService {
         try {
             jsonObject = (JSONObject) jsonParser.parse(jsonString);
         } catch (ParseException e) {
+            logger.error("failed to parse weather data, data: " + jsonString);
             throw new RuntimeException(e);
         }
         Map<String, Object> resultMap = new HashMap<>();
