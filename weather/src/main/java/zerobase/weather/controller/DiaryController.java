@@ -24,9 +24,9 @@ public class DiaryController {
 
     @GetMapping("/read/diary")
     List<Diary> readDiary(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        if (date.isAfter(LocalDate.ofYearDay(2023, 1))) {
-            throw new InvalidDate();
-        }
+//        if (date.isAfter(LocalDate.ofYearDay(2023, 1))) {
+//            throw new InvalidDate();
+//        }
         return diaryService.readDiary(date);
     }
 
@@ -45,4 +45,8 @@ public class DiaryController {
     void deleteDiary(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         diaryService.deleteDiary(date);
     }
+//    @ExceptionHandler(Exception.class)
+//    void hey(){
+//
+//    }
 }
